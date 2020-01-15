@@ -111,10 +111,10 @@ def Home():
     membersmenu = Menu(menubar, tearoff=0)
     accountmenu.add_command(label="Logout", command=Logout)
     accountmenu.add_command(label="Exit", command=Exit2)
-    bookmenu.add_command(label="Add new book", command=ShowAddNew)
-    bookmenu.add_command(label="View all books", command=ShowView)
-    membersmenu.add_command(label="Add new member", command=ShowAddNew)
-    membersmenu.add_command(label="View all members", command=ShowView)
+    bookmenu.add_command(label="Add new book", command=ShowAddNewBook)
+    bookmenu.add_command(label="View all books", command=ShowBooksView)
+    membersmenu.add_command(label="Add new member", command=ShowAddNewMember)
+    membersmenu.add_command(label="View all members", command=ShowMembersView)
     menubar.add_cascade(label="Account", menu=accountmenu)
     menubar.add_cascade(label="Books", menu=bookmenu)
     menubar.add_cascade(label="Members", menu=membersmenu)
@@ -122,43 +122,44 @@ def Home():
     Home.config(menu=menubar)
     Home.config(bg="#99ff99")
 
-def ShowAddNew():
-    global addnewform
-    addnewform = Toplevel()
-    addnewform.title("getINNOtized Library Management System/Add new book")
+#=====================================================BOOKS=====================================
+def ShowAddNewBook():
+    global addnewbookform
+    addnewbookform = Toplevel()
+    addnewbookform.title("getINNOtized Library Management System/Add new book")
     width = 600
     height = 500
     screen_width = Home.winfo_screenwidth()
     screen_height = Home.winfo_screenheight()
     x = (screen_width/2) - (width/2)
     y = (screen_height/2) - (height/2)
-    addnewform.geometry("%dx%d+%d+%d" % (width, height, x, y))
-    addnewform.resizable(0, 0)
-    AddNewForm()
+    addnewbookform.geometry("%dx%d+%d+%d" % (width, height, x, y))
+    addnewbookform.resizable(0, 0)
+    AddNewBookForm()
 
-def AddNewForm():
-    TopAddNew = Frame(addnewform, width=600, height=100, bd=1, relief=SOLID)
+def AddNewBookForm():
+    TopAddNew = Frame(addnewbookform, width=600, height=100, bd=1, relief=SOLID)
     TopAddNew.pack(side=TOP, pady=20)
     lbl_text = Label(TopAddNew, text="Add New Book", font=('arial', 18), width=600)
     lbl_text.pack(fill=X)
-    MidAddNew = Frame(addnewform, width=600)
-    MidAddNew.pack(side=TOP, pady=50)
-    lbl_booktitle = Label(MidAddNew, text="Book Title:", font=('arial', 25), bd=10)
+    MidAddNewBook = Frame(addnewbookform, width=600)
+    MidAddNewBook.pack(side=TOP, pady=50)
+    lbl_booktitle = Label(MidAddNewBook, text="Book Title:", font=('arial', 25), bd=10)
     lbl_booktitle.grid(row=0, sticky=W)
-    lbl_qty = Label(MidAddNew, text="Book Quantity:", font=('arial', 25), bd=10)
+    lbl_qty = Label(MidAddNewBook, text="Book Quantity:", font=('arial', 25), bd=10)
     lbl_qty.grid(row=1, sticky=W)
-    lbl_author = Label(MidAddNew, text="Author:", font=('arial', 25), bd=10)
+    lbl_author = Label(MidAddNewBook, text="Author:", font=('arial', 25), bd=10)
     lbl_author.grid(row=2, sticky=W)
-    booktitle = Entry(MidAddNew, textvariable=BOOK_TITLE, font=('arial', 25), width=15)
+    booktitle = Entry(MidAddNewBook, textvariable=BOOK_TITLE, font=('arial', 25), width=15)
     booktitle.grid(row=0, column=1)
-    bookqty = Entry(MidAddNew, textvariable=BOOK_QTY, font=('arial', 25), width=15)
+    bookqty = Entry(MidAddNewBook, textvariable=BOOK_QTY, font=('arial', 25), width=15)
     bookqty.grid(row=1, column=1)
-    author = Entry(MidAddNew, textvariable=AUTHOR, font=('arial', 25), width=15)
+    author = Entry(MidAddNewBook, textvariable=AUTHOR, font=('arial', 25), width=15)
     author.grid(row=2, column=1)
-    btn_add = Button(MidAddNew, text="Save", font=('arial', 18), width=30, bg="#009ACD", command=AddNew)
+    btn_add = Button(MidAddNewBook, text="Save", font=('arial', 18), width=30, bg="#009ACD", command=AddNewBook)
     btn_add.grid(row=3, columnspan=2, pady=20)
 
-def AddNew():
+def AddNewBook():
     Database()
     cursor.execute("INSERT INTO `book` (book_title, book_qty, author) VALUES(?, ?, ?)", (str(BOOK_TITLE.get()), int(BOOK_QTY.get()), str(AUTHOR.get())))
     conn.commit()
@@ -168,13 +169,13 @@ def AddNew():
     cursor.close()
     conn.close()
 
-def ViewForm():
+def ViewBooksForm():
     global tree
-    TopViewForm = Frame(viewform, width=600, bd=1, relief=SOLID)
+    TopViewForm = Frame(viewbooksform, width=600, bd=1, relief=SOLID)
     TopViewForm.pack(side=TOP, fill=X)
-    LeftViewForm = Frame(viewform, width=600)
+    LeftViewForm = Frame(viewbooksform, width=600)
     LeftViewForm.pack(side=LEFT, fill=Y)
-    MidViewForm = Frame(viewform, width=600)
+    MidViewForm = Frame(viewbooksform, width=600)
     MidViewForm.pack(side=RIGHT)
     lbl_text = Label(TopViewForm, text="All Library Books", font=('arial', 18), width=600)
     lbl_text.pack(fill=X)
@@ -182,11 +183,11 @@ def ViewForm():
     lbl_txtsearch.pack(side=TOP, anchor=W)
     search = Entry(LeftViewForm, textvariable=SEARCH, font=('arial', 15), width=10)
     search.pack(side=TOP,  padx=10, fill=X)
-    btn_search = Button(LeftViewForm, text="Search", command=Search)
+    btn_search = Button(LeftViewForm, text="Search", command=SearchBook)
     btn_search.pack(side=TOP, padx=10, pady=10, fill=X)
-    btn_reset = Button(LeftViewForm, text="Reset", command=Reset)
+    btn_reset = Button(LeftViewForm, text="Reset", command=ResetBookSearch)
     btn_reset.pack(side=TOP, padx=10, pady=10, fill=X)
-    btn_delete = Button(LeftViewForm, text="Delete", command=Delete)
+    btn_delete = Button(LeftViewForm, text="Delete", command=DeleteBook)
     btn_delete.pack(side=TOP, padx=10, pady=10, fill=X)
     scrollbarx = Scrollbar(MidViewForm, orient=HORIZONTAL)
     scrollbary = Scrollbar(MidViewForm, orient=VERTICAL)
@@ -205,9 +206,9 @@ def ViewForm():
     tree.column('#3', stretch=NO, minwidth=0, width=120)
     tree.column('#4', stretch=NO, minwidth=0, width=120)
     tree.pack()
-    DisplayData()
+    DisplayBooksData()
 
-def DisplayData():
+def DisplayBooksData():
     Database()
     cursor.execute("SELECT * FROM `book`")
     fetch = cursor.fetchall()
@@ -216,7 +217,7 @@ def DisplayData():
     cursor.close()
     conn.close()
 
-def Search():
+def SearchBook():
     if SEARCH.get() != "":
         tree.delete(*tree.get_children())
         Database()
@@ -227,12 +228,12 @@ def Search():
         cursor.close()
         conn.close()
 
-def Reset():
+def ResetBookSearch():
     tree.delete(*tree.get_children())
-    DisplayData()
+    DisplayBooksData()
     SEARCH.set("")
 
-def Delete():
+def DeleteBook():
     if not tree.selection():
        print("ERROR")
     else:
@@ -249,19 +250,23 @@ def Delete():
             conn.close()
     
 
-def ShowView():
-    global viewform
-    viewform = Toplevel()
-    viewform.title("getINNOtized Library Management System/Library Books")
+def ShowBooksView():
+    global viewbooksform
+    viewbooksform = Toplevel()
+    viewbooksform.title("getINNOtized Library Management System/Library Books")
     width = 600
     height = 400
     screen_width = Home.winfo_screenwidth()
     screen_height = Home.winfo_screenheight()
     x = (screen_width/2) - (width/2)
     y = (screen_height/2) - (height/2)
-    viewform.geometry("%dx%d+%d+%d" % (width, height, x, y))
-    viewform.resizable(0, 0)
-    ViewForm()
+    viewbooksform.geometry("%dx%d+%d+%d" % (width, height, x, y))
+    viewbooksform.resizable(0, 0)
+    ViewBooksForm()
+
+
+
+#============================================AUTHENTICATION===========================================
 
 def Logout():
     result = tkMessageBox.askquestion('getINNOtized Library Management System', 'Are you sure you want to logout?', icon="warning")

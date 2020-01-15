@@ -23,6 +23,9 @@ BOOK_TITLE = StringVar()
 AUTHOR = StringVar()
 BOOK_QTY = IntVar()
 SEARCH = StringVar()
+MEMBER_NAME = StringVar()
+EMAIL = StringVar()
+PHONE = StringVar()
 
 #========================================METHODS==========================================
 

@@ -102,14 +102,19 @@ def Home():
     lbl_display = Label(Title, text="getINNOtized Library Management System", font=('arial bold', 30))
     lbl_display.pack()
     menubar = Menu(Home)
-    filemenu = Menu(menubar, tearoff=0)
-    filemenu2 = Menu(menubar, tearoff=0)
-    filemenu.add_command(label="Logout", command=Logout)
-    filemenu.add_command(label="Exit", command=Exit2)
-    filemenu2.add_command(label="Add new book", command=ShowAddNew)
-    filemenu2.add_command(label="View all books", command=ShowView)
-    menubar.add_cascade(label="Account", menu=filemenu)
-    menubar.add_cascade(label="Books", menu=filemenu2)
+    accountmenu = Menu(menubar, tearoff=0)
+    bookmenu = Menu(menubar, tearoff=0)
+    membersmenu = Menu(menubar, tearoff=0)
+    accountmenu.add_command(label="Logout", command=Logout)
+    accountmenu.add_command(label="Exit", command=Exit2)
+    bookmenu.add_command(label="Add new book", command=ShowAddNew)
+    bookmenu.add_command(label="View all books", command=ShowView)
+    membersmenu.add_command(label="Add new member", command=ShowAddNew)
+    membersmenu.add_command(label="View all members", command=ShowView)
+    menubar.add_cascade(label="Account", menu=accountmenu)
+    menubar.add_cascade(label="Books", menu=bookmenu)
+    menubar.add_cascade(label="Members", menu=membersmenu)
+
     Home.config(menu=menubar)
     Home.config(bg="#99ff99")
 
@@ -291,10 +296,10 @@ def ShowHome():
 
 #========================================MENUBAR WIDGETS==================================
 menubar = Menu(root)
-filemenu = Menu(menubar, tearoff=0)
-filemenu.add_command(label="Account", command=ShowLoginForm)
-filemenu.add_command(label="Exit", command=Exit)
-menubar.add_cascade(label="File", menu=filemenu)
+accountmenu = Menu(menubar, tearoff=0)
+accountmenu.add_command(label="Account", command=ShowLoginForm)
+accountmenu.add_command(label="Exit", command=Exit)
+menubar.add_cascade(label="File", menu=accountmenu)
 root.config(menu=menubar)
 
 #========================================FRAME============================================

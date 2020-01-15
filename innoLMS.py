@@ -264,6 +264,147 @@ def ShowBooksView():
     viewbooksform.resizable(0, 0)
     ViewBooksForm()
 
+#=====================================================MEMBERS=====================================
+def ShowAddNewMember():
+    global addnewmemberform
+    addnewmemberform = Toplevel()
+    addnewmemberform.title("getINNOtized Library Management System/Add new book")
+    width = 600
+    height = 500
+    screen_width = Home.winfo_screenwidth()
+    screen_height = Home.winfo_screenheight()
+    x = (screen_width/2) - (width/2)
+    y = (screen_height/2) - (height/2)
+    addnewmemberform.geometry("%dx%d+%d+%d" % (width, height, x, y))
+    addnewmemberform.resizable(0, 0)
+    AddNewMemberForm()
+
+def AddNewMemberForm():
+    TopAddNew = Frame(addnewmemberform, width=600, height=100, bd=1, relief=SOLID)
+    TopAddNew.pack(side=TOP, pady=20)
+    lbl_text = Label(TopAddNew, text="Add New Member", font=('arial', 18), width=600)
+    lbl_text.pack(fill=X)
+    MidAddNewMember = Frame(addnewmemberform, width=600)
+    MidAddNewMember.pack(side=TOP, pady=50)
+    lbl_membername = Label(MidAddNewMember, text="Name:", font=('arial', 25), bd=10)
+    lbl_membername.grid(row=0, sticky=W)
+    lbl_email = Label(MidAddNewMember, text="Email:", font=('arial', 25), bd=10)
+    lbl_email.grid(row=1, sticky=W)
+    lbl_phone = Label(MidAddNewMember, text="Phone:", font=('arial', 25), bd=10)
+    lbl_phone.grid(row=2, sticky=W)
+    membername = Entry(MidAddNewMember, textvariable=MEMBER_NAME, font=('arial', 25), width=15)
+    membername.grid(row=0, column=1)
+    email = Entry(MidAddNewMember, textvariable=EMAIL, font=('arial', 25), width=15)
+    email.grid(row=1, column=1)
+    phone = Entry(MidAddNewMember, textvariable=PHONE, font=('arial', 25), width=15)
+    phone.grid(row=2, column=1)
+    btn_add = Button(MidAddNewMember, text="Save", font=('arial', 18), width=30, bg="#009ACD", command=AddNewMember)
+    btn_add.grid(row=3, columnspan=2, pady=20)
+
+def AddNewMember():
+    Database()
+    cursor.execute("INSERT INTO `members` (member_name, email, phone) VALUES(?, ?, ?)", (str(MEMBER_NAME.get()), str(EMAIL.get()), str(PHONE.get())))
+    conn.commit()
+    MEMBER_NAME.set("")
+    PHONE.set("")
+    EMAIL.set("")
+    cursor.close()
+    conn.close()
+
+def ViewMembersForm():
+    global tree
+    TopViewForm = Frame(viewmembersform, width=600, bd=1, relief=SOLID)
+    TopViewForm.pack(side=TOP, fill=X)
+    LeftViewForm = Frame(viewmembersform, width=600)
+    LeftViewForm.pack(side=LEFT, fill=Y)
+    MidViewForm = Frame(viewmembersform, width=600)
+    MidViewForm.pack(side=RIGHT)
+    lbl_text = Label(TopViewForm, text="Library Members", font=('arial', 18), width=600)
+    lbl_text.pack(fill=X)
+    lbl_txtsearch = Label(LeftViewForm, text="Search", font=('arial', 15))
+    lbl_txtsearch.pack(side=TOP, anchor=W)
+    search = Entry(LeftViewForm, textvariable=SEARCH, font=('arial', 15), width=10)
+    search.pack(side=TOP,  padx=10, fill=X)
+    btn_search = Button(LeftViewForm, text="Search", command=SearchMember)
+    btn_search.pack(side=TOP, padx=10, pady=10, fill=X)
+    btn_reset = Button(LeftViewForm, text="Reset", command=ResetMemberSearch)
+    btn_reset.pack(side=TOP, padx=10, pady=10, fill=X)
+    btn_delete = Button(LeftViewForm, text="Delete", command=DeleteMember)
+    btn_delete.pack(side=TOP, padx=10, pady=10, fill=X)
+    scrollbarx = Scrollbar(MidViewForm, orient=HORIZONTAL)
+    scrollbary = Scrollbar(MidViewForm, orient=VERTICAL)
+    tree = ttk.Treeview(MidViewForm, columns=("MemberID", "Name", "Email", "Phone"), selectmode="extended", height=100, yscrollcommand=scrollbary.set, xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=tree.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=tree.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    tree.heading('MemberID', text="MemberID",anchor=W)
+    tree.heading('Name', text="Name",anchor=W)
+    tree.heading('Email', text="Email",anchor=W)
+    tree.heading('Phone', text="Phone",anchor=W)
+    tree.column('#0', stretch=NO, minwidth=0, width=0)
+    tree.column('#1', stretch=NO, minwidth=0, width=0)
+    tree.column('#2', stretch=NO, minwidth=0, width=200)
+    tree.column('#3', stretch=NO, minwidth=0, width=120)
+    tree.column('#4', stretch=NO, minwidth=0, width=120)
+    tree.pack()
+    DisplayMembersData()
+
+def DisplayMembersData():
+    Database()
+    cursor.execute("SELECT * FROM `members`")
+    fetch = cursor.fetchall()
+    for data in fetch:
+        tree.insert('', 'end', values=(data))
+    cursor.close()
+    conn.close()
+
+def SearchMember():
+    if SEARCH.get() != "":
+        tree.delete(*tree.get_children())
+        Database()
+        cursor.execute("SELECT * FROM `members` WHERE `member_name` LIKE ?", ('%'+str(SEARCH.get())+'%',))
+        fetch = cursor.fetchall()
+        for data in fetch:
+            tree.insert('', 'end', values=(data))
+        cursor.close()
+        conn.close()
+
+def ResetMemberSearch():
+    tree.delete(*tree.get_children())
+    DisplayMembersData()
+    SEARCH.set("")
+
+def DeleteMember():
+    if not tree.selection():
+       print("ERROR")
+    else:
+        result = tkMessageBox.askquestion('getINNOtized Library Management System', 'Are you sure you want to delete this record?', icon="warning")
+        if result == 'yes':
+            curItem = tree.focus()
+            contents =(tree.item(curItem))
+            selecteditem = contents['values']
+            tree.delete(curItem)
+            Database()
+            cursor.execute("DELETE FROM `members` WHERE `member_id` = %d" % selecteditem[0])
+            conn.commit()
+            cursor.close()
+            conn.close()
+    
+
+def ShowMembersView():
+    global viewmembersform
+    viewmembersform = Toplevel()
+    viewmembersform.title("getINNOtized Library Management System/Library Members")
+    width = 600
+    height = 400
+    screen_width = Home.winfo_screenwidth()
+    screen_height = Home.winfo_screenheight()
+    x = (screen_width/2) - (width/2)
+    y = (screen_height/2) - (height/2)
+    viewmembersform.geometry("%dx%d+%d+%d" % (width, height, x, y))
+    viewmembersform.resizable(0, 0)
+    ViewMembersForm()
 
 
 #============================================AUTHENTICATION===========================================

@@ -116,7 +116,7 @@ def Home():
 def ShowAddNew():
     global addnewform
     addnewform = Toplevel()
-    addnewform.title("getINNOtized Library Management System/Add new")
+    addnewform.title("getINNOtized Library Management System/Add new book")
     width = 600
     height = 500
     screen_width = Home.winfo_screenwidth()
@@ -167,7 +167,7 @@ def ViewForm():
     LeftViewForm.pack(side=LEFT, fill=Y)
     MidViewForm = Frame(viewform, width=600)
     MidViewForm.pack(side=RIGHT)
-    lbl_text = Label(TopViewForm, text="View Books", font=('arial', 18), width=600)
+    lbl_text = Label(TopViewForm, text="All Library Books", font=('arial', 18), width=600)
     lbl_text.pack(fill=X)
     lbl_txtsearch = Label(LeftViewForm, text="Search", font=('arial', 15))
     lbl_txtsearch.pack(side=TOP, anchor=W)
@@ -243,7 +243,7 @@ def Delete():
 def ShowView():
     global viewform
     viewform = Toplevel()
-    viewform.title("getINNOtized Library Management System/View Book")
+    viewform.title("getINNOtized Library Management System/Library Books")
     width = 600
     height = 400
     screen_width = Home.winfo_screenwidth()

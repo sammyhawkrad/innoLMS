@@ -116,6 +116,7 @@ def Home():
     bookmenu = Menu(menubar, tearoff=0)
     membersmenu = Menu(menubar, tearoff=0)
     borrowsmenu = Menu(menubar, tearoff=0)
+    returnsmenu = Menu(menubar, tearoff=0)
     accountmenu.add_command(label="Logout", command=Logout)
     accountmenu.add_command(label="Exit", command=Exit2)
     bookmenu.add_command(label="Add new book", command=ShowAddNewBook)
@@ -124,6 +125,8 @@ def Home():
     membersmenu.add_command(label="View all members", command=ShowMembersView)
     borrowsmenu.add_command(label="Record new request", command=ShowAddNewBorrow)
     borrowsmenu.add_command(label="View borrowed books", command=ShowBorrowsView)
+    returnsmenu.add_command(label="Record new return", command=ShowAddNewReturn)
+    returnsmenu.add_command(label="View returned books", command=ShowReturnsView)
     menubar.add_cascade(label="Account", menu=accountmenu)
     menubar.add_cascade(label="Books", menu=bookmenu)
     menubar.add_cascade(label="Members", menu=membersmenu)
@@ -564,7 +567,6 @@ def ShowBorrowsView():
     viewborrowsform.geometry("%dx%d+%d+%d" % (width, height, x, y))
     viewborrowsform.resizable(0, 0)
     ViewBorrowsForm()
-
 
 #============================================AUTHENTICATION===========================================
 

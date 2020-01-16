@@ -131,6 +131,7 @@ def Home():
     menubar.add_cascade(label="Books", menu=bookmenu)
     menubar.add_cascade(label="Members", menu=membersmenu)
     menubar.add_cascade(label="Borrow Log", menu=borrowsmenu)
+    menubar.add_cascade(label="Return Log", menu=returnsmenu)
 
 
     Home.config(menu=menubar)

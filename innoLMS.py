@@ -39,7 +39,7 @@ def Database():
     cursor.execute("CREATE TABLE IF NOT EXISTS `admin` (admin_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, username TEXT, password TEXT)")
     cursor.execute("CREATE TABLE IF NOT EXISTS `book` (book_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, book_title TEXT, book_qty INTEGER, author TEXT)")
     cursor.execute("CREATE TABLE IF NOT EXISTS `members` (member_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, member_name TEXT, email TEXT, phone TEXT)")
-    cursor.execute("CREATE TABLE IF NOT EXISTS `borrows` (borrow_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, member_name TEXT, book_title TEXT, borrow_date DATE NOT NULL, due_date DATE NOT NULL, member_id NOT NULL REFERENCES `members`)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS `borrows` (borrow_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, member_name TEXT, book_title TEXT, borrow_date DATE NOT NULL, due_date DATE NOT NULL)")
     cursor.execute("SELECT * FROM `admin` WHERE `username` = 'admin' AND `password` = 'admin'")
     if cursor.fetchone() is None:
         cursor.execute("INSERT INTO `admin` (username, password) VALUES('admin', 'admin')")
@@ -415,6 +415,154 @@ def ShowMembersView():
     viewmembersform.resizable(0, 0)
     ViewMembersForm()
 
+#=====================================================BOOK BORROW=====================================
+def ShowAddNewBorrow():
+    global addnewborrowform
+    addnewborrowform = Toplevel()
+    addnewborrowform.title("getINNOtized Library Management System/Add new book borrow")
+    width = 600
+    height = 500
+    screen_width = Home.winfo_screenwidth()
+    screen_height = Home.winfo_screenheight()
+    x = (screen_width/2) - (width/2)
+    y = (screen_height/2) - (height/2)
+    addnewborrowform.geometry("%dx%d+%d+%d" % (width, height, x, y))
+    addnewborrowform.resizable(0, 0)
+    AddNewBorrowForm()
+
+def AddNewBorrowForm():
+    TopAddNew = Frame(addnewborrowform, width=600, height=100, bd=1, relief=SOLID)
+    TopAddNew.pack(side=TOP, pady=20)
+    lbl_text = Label(TopAddNew, text="Add New Borrow Request", font=('arial', 18), width=600)
+    lbl_text.pack(fill=X)
+    MidAddNewBorrow = Frame(addnewborrowform, width=600)
+    MidAddNewBorrow.pack(side=TOP, pady=50)
+    lbl_membername = Label(MidAddNewBorrow, text="Name:", font=('arial', 25), bd=10)
+    lbl_membername.grid(row=0, sticky=W)
+    lbl_booktitle = Label(MidAddNewBorrow, text="Book Title:", font=('arial', 25), bd=10)
+    lbl_booktitle.grid(row=1, sticky=W)
+    lbl_borrow_date = Label(MidAddNewBorrow, text="Borrow Date:", font=('arial', 25), bd=10)
+    lbl_borrow_date.grid(row=2, sticky=W)
+    lbl_due_date = Label(MidAddNewBorrow, text="Due Date:", font=('arial', 25), bd=10)
+    lbl_due_date.grid(row=3, sticky=W)
+    membername = Entry(MidAddNewBorrow, textvariable=MEMBER_NAME, font=('arial', 25), width=15)
+    membername.grid(row=0, column=1)
+    booktitle = Entry(MidAddNewBorrow, textvariable=BOOK_TITLE, font=('arial', 25), width=15)
+    booktitle.grid(row=1, column=1)
+    borrow_date = Entry(MidAddNewBorrow, textvariable=BORROW_DATE, font=('arial', 25), width=15)
+    borrow_date.grid(row=2, column=1)
+    due_date = Entry(MidAddNewBorrow, textvariable=DUE_DATE, font=('arial', 25), width=15)
+    due_date.grid(row=3, column=1)
+    btn_add = Button(MidAddNewBorrow, text="Save", font=('arial', 18), width=30, bg="#009ACD", command=AddNewBorrow)
+    btn_add.grid(row=4, columnspan=2, pady=20)
+
+def AddNewBorrow():
+    Database()
+    cursor.execute("INSERT INTO `borrows` (member_name, book_title, borrow_date, due_date) VALUES(?, ?, ?, ?)", (str(MEMBER_NAME.get()), str(BOOK_TITLE.get()), str(BORROW_DATE.get()), str(DUE_DATE.get())))
+    conn.commit()
+    MEMBER_NAME.set("")
+    BOOK_TITLE.set("")
+    BORROW_DATE.set("")
+    DUE_DATE.set("")
+    cursor.close()
+    conn.close()
+
+def ViewBorrowsForm():
+    global tree
+    TopViewForm = Frame(viewborrowsform, width=600, bd=1, relief=SOLID)
+    TopViewForm.pack(side=TOP, fill=X)
+    LeftViewForm = Frame(viewborrowsform, width=600)
+    LeftViewForm.pack(side=LEFT, fill=Y)
+    MidViewForm = Frame(viewborrowsform, width=600)
+    MidViewForm.pack(side=RIGHT)
+    lbl_text = Label(TopViewForm, text="List of Borrowed Books", font=('arial', 18), width=600)
+    lbl_text.pack(fill=X)
+    lbl_txtsearch = Label(LeftViewForm, text="Search", font=('arial', 15))
+    lbl_txtsearch.pack(side=TOP, anchor=W)
+    search = Entry(LeftViewForm, textvariable=SEARCH, font=('arial', 15), width=10)
+    search.pack(side=TOP,  padx=10, fill=X)
+    btn_search = Button(LeftViewForm, text="Search", command=SearchBorrow)
+    btn_search.pack(side=TOP, padx=10, pady=10, fill=X)
+    btn_reset = Button(LeftViewForm, text="Reset", command=ResetBorrowSearch)
+    btn_reset.pack(side=TOP, padx=10, pady=10, fill=X)
+    btn_delete = Button(LeftViewForm, text="Delete", command=DeleteBorrow)
+    btn_delete.pack(side=TOP, padx=10, pady=10, fill=X)
+    scrollbarx = Scrollbar(MidViewForm, orient=HORIZONTAL)
+    scrollbary = Scrollbar(MidViewForm, orient=VERTICAL)
+    tree = ttk.Treeview(MidViewForm, columns=("BorrowID", "Name", "Book Title", "Borrow Date", "Due Date"), selectmode="extended", height=100, yscrollcommand=scrollbary.set, xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=tree.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=tree.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    tree.heading('BorrowID', text="BorrowID",anchor=W)
+    tree.heading('Name', text="Name",anchor=W)
+    tree.heading('Book Title', text="Book Title",anchor=W)
+    tree.heading('Borrow Date', text="Borrow Date",anchor=W)
+    tree.heading('Due Date', text="Due Date",anchor=W)
+    tree.column('#0', stretch=NO, minwidth=0, width=0)
+    tree.column('#1', stretch=NO, minwidth=0, width=0)
+    tree.column('#2', stretch=NO, minwidth=0, width=200)
+    tree.column('#3', stretch=NO, minwidth=0, width=120)
+    tree.column('#4', stretch=NO, minwidth=0, width=120)
+    tree.pack()
+    DisplayBorrowsData()
+
+def DisplayBorrowsData():
+    Database()
+    cursor.execute("SELECT * FROM `borrows`")
+    fetch = cursor.fetchall()
+    for data in fetch:
+        tree.insert('', 'end', values=(data))
+    cursor.close()
+    conn.close()
+
+def SearchBorrow():
+    if SEARCH.get() != "":
+        tree.delete(*tree.get_children())
+        Database()
+        cursor.execute("SELECT * FROM `borrows` WHERE `member_name` OR `book_title` LIKE ?", ('%'+str(SEARCH.get())+'%',))
+        fetch = cursor.fetchall()
+        for data in fetch:
+            tree.insert('', 'end', values=(data))
+        cursor.close()
+        conn.close()
+
+def ResetBorrowSearch():
+    tree.delete(*tree.get_children())
+    DisplayBorrowsData()
+    SEARCH.set("")
+
+def DeleteBorrow():
+    if not tree.selection():
+       print("ERROR")
+    else:
+        result = tkMessageBox.askquestion('getINNOtized Library Management System', 'Are you sure you want to delete this record?', icon="warning")
+        if result == 'yes':
+            curItem = tree.focus()
+            contents =(tree.item(curItem))
+            selecteditem = contents['values']
+            tree.delete(curItem)
+            Database()
+            cursor.execute("DELETE FROM `borrows` WHERE `borrow_id` = %d" % selecteditem[0])
+            conn.commit()
+            cursor.close()
+            conn.close()
+    
+
+def ShowBorrowsView():
+    global viewborrowsform
+    viewborrowsform = Toplevel()
+    viewborrowsform.title("getINNOtized Library Management System/Borrowed Books")
+    width = 600
+    height = 400
+    screen_width = Home.winfo_screenwidth()
+    screen_height = Home.winfo_screenheight()
+    x = (screen_width/2) - (width/2)
+    y = (screen_height/2) - (height/2)
+    viewborrowsform.geometry("%dx%d+%d+%d" % (width, height, x, y))
+    viewborrowsform.resizable(0, 0)
+    ViewBorrowsForm()
+
 
 #============================================AUTHENTICATION===========================================
 
@@ -451,9 +599,6 @@ def ShowHome():
     root.withdraw()
     Home()
     loginform.destroy()
-
-
-
 
 #========================================MENUBAR WIDGETS==================================
 menubar = Menu(root)

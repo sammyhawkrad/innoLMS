@@ -41,7 +41,7 @@ def Database():
     cursor.execute("CREATE TABLE IF NOT EXISTS `book` (book_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, book_title TEXT, book_qty INTEGER, author TEXT)")
     cursor.execute("CREATE TABLE IF NOT EXISTS `members` (member_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, member_name TEXT, email TEXT, phone TEXT)")
     cursor.execute("CREATE TABLE IF NOT EXISTS `borrows` (borrow_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, member_name TEXT, book_title TEXT, borrow_date DATE NOT NULL, due_date DATE NOT NULL)")
-    cursor.execute("CREATE TABLE IF NOT EXISTS `returns` (return_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, member_name TEXT, book_title TEXT, borrow_date DATE NOT NULL, return_date DATE NOT NULL)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS `returns` (return_id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, member_name TEXT, book_title TEXT, return_date DATE NOT NULL, due_date DATE NOT NULL)")
     cursor.execute("SELECT * FROM `admin` WHERE `username` = 'admin' AND `password` = 'admin'")
     if cursor.fetchone() is None:
         cursor.execute("INSERT INTO `admin` (username, password) VALUES('admin', 'admin')")
@@ -568,6 +568,8 @@ def ShowBorrowsView():
     viewborrowsform.geometry("%dx%d+%d+%d" % (width, height, x, y))
     viewborrowsform.resizable(0, 0)
     ViewBorrowsForm()
+
+
 
 #============================================AUTHENTICATION===========================================
 

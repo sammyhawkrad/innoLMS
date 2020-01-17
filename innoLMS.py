@@ -569,6 +569,153 @@ def ShowBorrowsView():
     viewborrowsform.resizable(0, 0)
     ViewBorrowsForm()
 
+#=====================================================BOOK RETURN=====================================
+def ShowAddNewReturn():
+    global addnewreturnform
+    addnewreturnform = Toplevel()
+    addnewreturnform.title("getINNOtized Library Management System/Record book return")
+    width = 600
+    height = 500
+    screen_width = Home.winfo_screenwidth()
+    screen_height = Home.winfo_screenheight()
+    x = (screen_width/2) - (width/2)
+    y = (screen_height/2) - (height/2)
+    addnewreturnform.geometry("%dx%d+%d+%d" % (width, height, x, y))
+    addnewreturnform.resizable(0, 0)
+    AddNewReturnForm()
+
+def AddNewReturnForm():
+    TopAddNew = Frame(addnewreturnform, width=600, height=100, bd=1, relief=SOLID)
+    TopAddNew.pack(side=TOP, pady=20)
+    lbl_text = Label(TopAddNew, text="Add New Return Request", font=('arial', 18), width=600)
+    lbl_text.pack(fill=X)
+    MidAddNewReturn = Frame(addnewreturnform, width=600)
+    MidAddNewReturn.pack(side=TOP, pady=50)
+    lbl_membername = Label(MidAddNewReturn, text="Name:", font=('arial', 25), bd=10)
+    lbl_membername.grid(row=0, sticky=W)
+    lbl_booktitle = Label(MidAddNewReturn, text="Book Title:", font=('arial', 25), bd=10)
+    lbl_booktitle.grid(row=1, sticky=W)
+    lbl_return_date = Label(MidAddNewReturn, text="Return Date:", font=('arial', 25), bd=10)
+    lbl_return_date.grid(row=2, sticky=W)
+    lbl_due_date = Label(MidAddNewReturn, text="Due Date:", font=('arial', 25), bd=10)
+    lbl_due_date.grid(row=3, sticky=W)
+    membername = Entry(MidAddNewReturn, textvariable=MEMBER_NAME, font=('arial', 25), width=15)
+    membername.grid(row=0, column=1)
+    booktitle = Entry(MidAddNewReturn, textvariable=BOOK_TITLE, font=('arial', 25), width=15)
+    booktitle.grid(row=1, column=1)
+    return_date = Entry(MidAddNewReturn, textvariable=RETURN_DATE, font=('arial', 25), width=15)
+    return_date.grid(row=2, column=1)
+    due_date = Entry(MidAddNewReturn, textvariable=DUE_DATE, font=('arial', 25), width=15)
+    due_date.grid(row=3, column=1)
+    btn_add = Button(MidAddNewReturn, text="Save", font=('arial', 18), width=30, bg="#009ACD", command=AddNewReturn)
+    btn_add.grid(row=4, columnspan=2, pady=20)
+
+def AddNewReturn():
+    Database()
+    cursor.execute("INSERT INTO `returns` (member_name, book_title, return_date, due_date) VALUES(?, ?, ?, ?)", (str(MEMBER_NAME.get()), str(BOOK_TITLE.get()), str(RETURN_DATE.get()), str(DUE_DATE.get())))
+    conn.commit()
+    MEMBER_NAME.set("")
+    BOOK_TITLE.set("")
+    RETURN_DATE.set("")
+    DUE_DATE.set("")
+    cursor.close()
+    conn.close()
+
+def ViewReturnsForm():
+    global tree
+    TopViewForm = Frame(viewreturnsform, width=600, bd=1, relief=SOLID)
+    TopViewForm.pack(side=TOP, fill=X)
+    LeftViewForm = Frame(viewreturnsform, width=600)
+    LeftViewForm.pack(side=LEFT, fill=Y)
+    MidViewForm = Frame(viewreturnsform, width=600)
+    MidViewForm.pack(side=RIGHT)
+    lbl_text = Label(TopViewForm, text="List of Returned Books", font=('arial', 18), width=600)
+    lbl_text.pack(fill=X)
+    lbl_txtsearch = Label(LeftViewForm, text="Search", font=('arial', 15))
+    lbl_txtsearch.pack(side=TOP, anchor=W)
+    search = Entry(LeftViewForm, textvariable=SEARCH, font=('arial', 15), width=10)
+    search.pack(side=TOP,  padx=10, fill=X)
+    btn_search = Button(LeftViewForm, text="Search", command=SearchReturn)
+    btn_search.pack(side=TOP, padx=10, pady=10, fill=X)
+    btn_reset = Button(LeftViewForm, text="Reset", command=ResetReturnSearch)
+    btn_reset.pack(side=TOP, padx=10, pady=10, fill=X)
+    btn_delete = Button(LeftViewForm, text="Delete", command=DeleteReturn)
+    btn_delete.pack(side=TOP, padx=10, pady=10, fill=X)
+    scrollbarx = Scrollbar(MidViewForm, orient=HORIZONTAL)
+    scrollbary = Scrollbar(MidViewForm, orient=VERTICAL)
+    tree = ttk.Treeview(MidViewForm, columns=("ReturnID", "Name", "Book Title", "Return Date", "Due Date"), selectmode="extended", height=100, yscrollcommand=scrollbary.set, xscrollcommand=scrollbarx.set)
+    scrollbary.config(command=tree.yview)
+    scrollbary.pack(side=RIGHT, fill=Y)
+    scrollbarx.config(command=tree.xview)
+    scrollbarx.pack(side=BOTTOM, fill=X)
+    tree.heading('ReturnID', text="ReturnID",anchor=W)
+    tree.heading('Name', text="Name",anchor=W)
+    tree.heading('Book Title', text="Book Title",anchor=W)
+    tree.heading('Return Date', text="Return Date",anchor=W)
+    tree.heading('Due Date', text="Due Date",anchor=W)
+    tree.column('#0', stretch=NO, minwidth=0, width=0)
+    tree.column('#1', stretch=NO, minwidth=0, width=0)
+    tree.column('#2', stretch=NO, minwidth=0, width=200)
+    tree.column('#3', stretch=NO, minwidth=0, width=120)
+    tree.column('#4', stretch=NO, minwidth=0, width=120)
+    tree.pack()
+    DisplayReturnsData()
+
+def DisplayReturnsData():
+    Database()
+    cursor.execute("SELECT * FROM `returns`")
+    fetch = cursor.fetchall()
+    for data in fetch:
+        tree.insert('', 'end', values=(data))
+    cursor.close()
+    conn.close()
+
+def SearchReturn():
+    if SEARCH.get() != "":
+        tree.delete(*tree.get_children())
+        Database()
+        cursor.execute("SELECT * FROM `returns` WHERE `member_name` OR `book_title` LIKE ?", ('%'+str(SEARCH.get())+'%',))
+        fetch = cursor.fetchall()
+        for data in fetch:
+            tree.insert('', 'end', values=(data))
+        cursor.close()
+        conn.close()
+
+def ResetReturnSearch():
+    tree.delete(*tree.get_children())
+    DisplayReturnsData()
+    SEARCH.set("")
+
+def DeleteReturn():
+    if not tree.selection():
+       print("ERROR")
+    else:
+        result = tkMessageBox.askquestion('getINNOtized Library Management System', 'Are you sure you want to delete this record?', icon="warning")
+        if result == 'yes':
+            curItem = tree.focus()
+            contents =(tree.item(curItem))
+            selecteditem = contents['values']
+            tree.delete(curItem)
+            Database()
+            cursor.execute("DELETE FROM `returns` WHERE `return_id` = %d" % selecteditem[0])
+            conn.commit()
+            cursor.close()
+            conn.close()
+    
+
+def ShowReturnsView():
+    global viewreturnsform
+    viewreturnsform = Toplevel()
+    viewreturnsform.title("getINNOtized Library Management System/Returned Books")
+    width = 600
+    height = 400
+    screen_width = Home.winfo_screenwidth()
+    screen_height = Home.winfo_screenheight()
+    x = (screen_width/2) - (width/2)
+    y = (screen_height/2) - (height/2)
+    viewreturnsform.geometry("%dx%d+%d+%d" % (width, height, x, y))
+    viewreturnsform.resizable(0, 0)
+    ViewReturnsForm()
 
 
 #============================================AUTHENTICATION===========================================
